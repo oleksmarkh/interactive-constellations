@@ -1,2 +1,5 @@
 # interactive-constellations
-:telescope: moving particles, looking like stars (WebGL experiment)
+
+A WebGL experiment aimed to create an interactive visualization of gravitating particles.
+
+The goal is to have an embeddable widget, providing external interfaces, e.g. as a React component.
