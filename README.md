@@ -8,8 +8,9 @@ The goal is to have an embeddable widget, providing external interfaces, e.g. as
 
 ## Tech stack
 
-- [ ] [three.js](https://threejs.org/docs/)
-- [ ] [jest](https://facebook.github.io/jest)
+- [x] [three.js](https://threejs.org/docs/)
+- [ ] [d3-scale](https://github.com/d3/d3-scale)
+- [x] [jest](https://facebook.github.io/jest)
 
 ## Setup
 
@@ -23,6 +24,12 @@ $ yarn install
 
 ```bash
 $ yarn run:dev
+```
+
+### Run unit tests
+
+```bash
+$ yarn test
 ```
 
 ### Build and deploy to GitHub pages
