@@ -45,7 +45,7 @@ loaders.ts = {
 };
 
 plugins.html = new HtmlWebpackPlugin({
-  template: './index.html',
+  template: './app/index.html',
   title: 'interactive-constellations',
 });
 
@@ -70,7 +70,7 @@ plugins.hotModuleReplacement = new webpack.HotModuleReplacementPlugin();
 const config = {
   context: SRC_DIR,
 
-  entry: './index.ts',
+  entry: './app/index.ts',
 
   output: {
     path: DIST_DIR,

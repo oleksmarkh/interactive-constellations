@@ -1,0 +1,68 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title><%= htmlWebpackPlugin.options.title %></title>
+
+    <style type="text/css">
+      body {
+        font-family: monospace;
+        margin: 0;
+        color: #456;
+        background-color: #234;
+      }
+
+      .container {
+        height: calc(100% - 8em);
+        max-width: calc(100% - 8em);
+        margin: 4em;
+        border: 1px solid #456;
+      }
+
+      .linksBox {
+        position: absolute;
+        right: 1em;
+        bottom: 1em;
+      }
+
+      .linksBox__list {
+        margin: 0;
+        list-style: none;
+      }
+
+      .linksBox__link {
+        text-decoration: none;
+        color: #567;
+      }
+
+      .linksBox__link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container" class="container"></div>
+
+    <nav class="linksBox">
+      <ul class="linksBox__list">
+        <li>
+          <span>GitHub:</span>
+          <a
+            class="linksBox__link"
+            href="https://github.com/oleksmarkh/interactive-constellations"
+            target="_blank"
+          >interactive-constellations</a>
+        </li>
+        <li>
+          <span>Twitter:</span>
+          <a
+            class="linksBox__link"
+            href="https://twitter.com/oleksmarkh"
+            target="_blank"
+          >@oleksmarkh</a>
+        </li>
+      </ul>
+    </nav>
+  </body>
+</html>

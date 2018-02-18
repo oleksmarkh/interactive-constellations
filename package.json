@@ -2,7 +2,7 @@
   "name": "interactive-constellations",
   "version": "0.0.0",
   "description": "an interactive visualization of gravitating particles",
-  "main": "src/index.ts",
+  "main": "src/lib/index.ts",
   "repository": "git@github.com:oleksmarkh/interactive-constellations.git",
   "author": "Oleksii Markhovskyi",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
-    "@types/three": "0.89.6",
+    "@types/stats.js": "^0.17.0",
+    "@types/three": "0.89.10",
     "awesome-typescript-loader": "3.4.1",
     "babel-core": "6.26.0",
     "babel-preset-env": "1.6.1",
@@ -26,14 +27,14 @@
     "html-webpack-plugin": "2.30.1",
     "husky": "0.14.3",
     "tslint": "5.9.1",
-    "tslint-eslint-rules": "4.1.1",
+    "tslint-eslint-rules": "5.0.0",
     "tslint-loader": "3.5.3",
-    "typescript": "2.7.1",
-    "webpack": "3.10.0",
+    "typescript": "2.7.2",
+    "webpack": "3.11.0",
     "webpack-dev-server": "2.11.1"
   },
   "dependencies": {
     "stats.js": "0.17.0",
-    "three": "0.89.0"
+    "three": "0.90.0"
   }
 }
