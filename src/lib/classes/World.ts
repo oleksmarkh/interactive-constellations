@@ -1,33 +1,38 @@
 import * as Stats from 'stats.js';
 
+import {DomView} from 'src/lib/types/View';
 import config from 'src/lib/config';
 
-class World {
+export class WorldView implements DomView {
   private stats: Stats;
 
   constructor(
-    private element: HTMLElement,
+    public element: HTMLElement,
+    private world: World,
   ) {
-    this.stats = null;
+    console.log(this.world);
+
+    this.stats = config.debug.stats
+      ? new Stats()
+      : null;
 
     this.animate = this.animate.bind(this);
   }
 
-  public initialize() {
-    this.enableDebugFeatures();
-
-    console.log(this.element);
-  }
-
-  public run() {
-    this.animate();
-  }
-
-  private enableDebugFeatures() {
-    if (config.debug.stats) {
-      this.stats = new Stats();
-      document.body.appendChild(this.stats.dom);
+  public mount() {
+    if (this.stats) {
+      this.element.appendChild(this.stats.dom);
     }
+  }
+
+  public unmount() {
+    if (this.stats) {
+      this.element.removeChild(this.stats.dom);
+    }
+  }
+
+  public render() {
+    this.animate();
   }
 
   private animate() {
@@ -37,6 +42,10 @@ class World {
       this.stats.update();
     }
   }
+}
+
+class World {
+
 }
 
 export default World;

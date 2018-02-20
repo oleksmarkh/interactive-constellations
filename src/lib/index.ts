@@ -1,10 +1,11 @@
-import World from 'src/lib/classes/World';
+import World, {WorldView} from 'src/lib/classes/World';
 
 function render(element: HTMLElement) {
-  const world = new World(element);
+  const world = new World();
+  const worldView = new WorldView(element, world);
 
-  world.initialize();
-  world.run();
+  worldView.mount();
+  worldView.render();
 }
 
 export default render;

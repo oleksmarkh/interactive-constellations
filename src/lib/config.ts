@@ -1,4 +1,4 @@
-import Config from 'src/lib/types/config';
+import Config from 'src/lib/types/Config';
 
 const config: Config = {
   debug: {
