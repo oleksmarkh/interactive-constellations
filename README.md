@@ -9,23 +9,21 @@ The goal is to have an embeddable widget, providing external interfaces, e.g. as
 
 ## Tech stack
 
-### dev deps
+dev deps:
+[`typescript`](https://www.typescriptlang.org/docs),
+[`webpack`](https://webpack.js.org/api),
+[`jest`](https://facebook.github.io/jest).
 
-- [x] [typescript](https://www.typescriptlang.org/docs)
-- [x] [webpack](https://webpack.js.org/api)
-- [x] [jest](https://facebook.github.io/jest)
-
-### deps
-
-- [x] [three.js](https://threejs.org/docs)
-- [ ] [d3-scale](https://github.com/d3/d3-scale)
+deps:
+[`three`](https://threejs.org/docs),
+[`d3-scale`](https://github.com/d3/d3-scale).
 
 ## Setup
 
 ```bash
 $ yarn install     # install deps
 $ yarn run:dev     # run a local dev server
-$ yarn tests       # run unit tests
+$ yarn test        # run unit tests
 $ yarn build:prod  # produce a build artifact
 $ yarn deploy      # deploy to GitHub pages
 ```
