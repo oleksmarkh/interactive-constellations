@@ -11,6 +11,8 @@ The goal is to have an embeddable widget, providing external interfaces, e.g. as
 
 ### dev deps
 
+- [x] [typescript](https://www.typescriptlang.org/docs)
+- [x] [webpack](https://webpack.js.org/api)
 - [x] [jest](https://facebook.github.io/jest)
 
 ### deps
@@ -20,10 +22,8 @@ The goal is to have an embeddable widget, providing external interfaces, e.g. as
 
 ## Setup
 
-### Install dependencies
-
 ```bash
-$ yarn Install     # install deps
+$ yarn install     # install deps
 $ yarn run:dev     # run a local dev server
 $ yarn tests       # run unit tests
 $ yarn build:prod  # produce a build artifact
