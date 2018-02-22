@@ -1,15 +1,16 @@
-interface HelpersConfig {
-  coords: boolean;
-}
-
-interface DebugConfig {
-  stats: boolean;
-  expose: boolean;
-  helpers: HelpersConfig;
-}
-
 interface Config {
-  debug: DebugConfig;
+  debug: {
+    stats: boolean;
+    expose: boolean;
+
+    helpers: {
+      coords: boolean;
+    };
+  };
+
+  render: {
+    antialias: boolean;
+  };
 }
 
 export interface Configurable {

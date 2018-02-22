@@ -9,6 +9,10 @@ const config: Config = {
       coords: true,
     },
   },
+
+  render: {
+    antialias: true,
+  },
 };
 
 export default config;
