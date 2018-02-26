@@ -4,7 +4,7 @@ interface Config {
     expose: boolean;
 
     helpers: {
-      coords: boolean;
+      axes: boolean;
     };
   };
 
@@ -27,7 +27,7 @@ interface Config {
 
 export interface Configurable {
   config: Config;
-  reloadConfig: () => boolean;
+  reloadConfig: () => void;
 }
 
 export default Config;

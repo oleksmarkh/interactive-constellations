@@ -1,9 +1,10 @@
-import {debounce, DebounceSettings} from 'lodash';
-import {WebGLRenderer, OrthographicCamera, Scene} from 'three';
+import {forEach, debounce, DebounceSettings} from 'lodash';
+import {WebGLRenderer, OrthographicCamera, Scene, Vector2, AxesHelper} from 'three';
 
 import Config, {Configurable} from 'src/lib/types/Config';
 import {CameraFrustum} from 'src/lib/types/Camera';
 import {DomView} from 'src/lib/types/View';
+
 import Stats from 'src/lib/classes/Stats';
 
 const debounceSettingsLeading: DebounceSettings = {
@@ -16,11 +17,16 @@ const debounceSettingsTrailing: DebounceSettings = {
   trailing: true,
 };
 
+interface Helpers {
+  axes?: AxesHelper;
+}
+
 export class WorldView implements DomView, Configurable {
   private renderer: WebGLRenderer;
   private camera: OrthographicCamera;
   private scene: Scene;
   private stats: Stats;
+  private helpers: Helpers;
 
   private isAnimating: boolean;
 
@@ -35,6 +41,7 @@ export class WorldView implements DomView, Configurable {
     this.camera = this.createCamera();
     this.scene = new Scene();
     this.stats = this.createStats();
+    this.helpers = this.createHelpers();
 
     this.isAnimating = false;
 
@@ -78,25 +85,24 @@ export class WorldView implements DomView, Configurable {
   }
 
   public run() {
+    this.addHelpers();
     this.playAnimation();
   }
 
-  public reloadConfig(): boolean {
+  public reloadConfig() {
     // @todo: readjust the camera (frustum, position)
 
     if (this.config.debug.stats && !this.stats) {
       this.stats = this.createStats();
       this.stats.mount();
-      return true;
-    }
-
-    if (!this.config.debug.stats && this.stats) {
+    } else if (!this.config.debug.stats && this.stats) {
       this.stats.unmount();
       this.stats = null;
-      return true;
     }
 
-    return false;
+    this.removeHelpers();
+    this.helpers = this.createHelpers();
+    this.addHelpers();
   }
 
   private subscribeToDomEvents() {
@@ -115,7 +121,7 @@ export class WorldView implements DomView, Configurable {
 
   private onResizeTrailing() {
     this.updateCamera();
-    this.setRendererSize(this.renderer);
+    this.updateRenderer(this.renderer);
     this.playAnimation();
   }
 
@@ -143,12 +149,13 @@ export class WorldView implements DomView, Configurable {
       devicePixelRatio: window.devicePixelRatio,
     });
 
-    this.setRendererSize(renderer);
+    this.updateRenderer(renderer);
 
     return renderer;
   }
 
-  private setRendererSize(renderer: WebGLRenderer) {
+  private updateRenderer(renderer: WebGLRenderer) {
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(this.element.clientWidth, this.element.clientHeight);
   }
 
@@ -189,10 +196,40 @@ export class WorldView implements DomView, Configurable {
     };
   }
 
+  private getPositionFromDomCoords(coords: Vector2): Vector2 {
+    // NDC (Normalized Device Coordinates: [-1, 1])
+    const vector = new Vector2(
+      (coords.x / this.element.clientWidth) * 2 - 1,
+      -(coords.y / this.element.clientHeight) * 2 + 1,
+    );
+    const {right, top} = this.getCameraFrustum();
+
+    return vector.multiply(new Vector2(right, top));
+  }
+
   private createStats(): Stats {
     return this.config.debug.stats
       ? new Stats(this.element)
       : null;
+  }
+
+  private createHelpers(): Helpers {
+    const helpers: Helpers = {};
+
+    if (this.config.debug.helpers.axes) {
+      const {x, y} = this.getPositionFromDomCoords(new Vector2(this.renderer.getSize().width, 0));
+      helpers.axes = new AxesHelper(Math.max(x, y));
+    }
+
+    return helpers;
+  }
+
+  private addHelpers() {
+    forEach(this.helpers, (helper) => this.scene.add(helper));
+  }
+
+  private removeHelpers() {
+    forEach(this.helpers, (helper) => this.scene.remove(helper));
   }
 }
 

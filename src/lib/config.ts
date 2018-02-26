@@ -6,7 +6,7 @@ const config: Config = {
     expose: true,
 
     helpers: {
-      coords: true,
+      axes: true,
     },
   },
 
