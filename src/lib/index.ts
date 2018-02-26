@@ -7,7 +7,7 @@ function render(element: HTMLElement) {
   const worldView = new WorldView(element, config, world);
 
   worldView.mount();
-  worldView.render();
+  worldView.run();
 
   if (config.debug.expose) {
     (window as ExtendedWindow).worldView = worldView;
