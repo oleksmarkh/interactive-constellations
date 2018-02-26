@@ -1,10 +1,10 @@
 import {forEach, debounce, DebounceSettings} from 'lodash';
-import {WebGLRenderer, OrthographicCamera, Scene, Vector2, AxesHelper} from 'three';
+import {WebGLRenderer, Scene, Vector2, AxesHelper} from 'three';
 
 import Config, {Configurable} from 'src/lib/types/Config';
-import {CameraFrustum} from 'src/lib/types/Camera';
 import {DomView} from 'src/lib/types/View';
 
+import Camera from 'src/lib/classes/Camera';
 import Stats from 'src/lib/classes/Stats';
 
 const debounceSettingsLeading: DebounceSettings = {
@@ -23,8 +23,8 @@ interface Helpers {
 
 export class WorldView implements DomView, Configurable {
   private renderer: WebGLRenderer;
-  private camera: OrthographicCamera;
   private scene: Scene;
+  private camera: Camera;
   private stats: Stats;
   private helpers: Helpers;
 
@@ -38,8 +38,8 @@ export class WorldView implements DomView, Configurable {
     console.log(this.world);
 
     this.renderer = this.createRenderer();
-    this.camera = this.createCamera();
     this.scene = new Scene();
+    this.camera = new Camera(this.element, this.config);
     this.stats = this.createStats();
     this.helpers = this.createHelpers();
 
@@ -81,7 +81,7 @@ export class WorldView implements DomView, Configurable {
       this.stats.render();
     }
 
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.camera.orthographicCamera);
   }
 
   public run() {
@@ -90,7 +90,7 @@ export class WorldView implements DomView, Configurable {
   }
 
   public reloadConfig() {
-    // @todo: readjust the camera (frustum, position)
+    this.camera.reloadConfig();
 
     if (this.config.debug.stats && !this.stats) {
       this.stats = this.createStats();
@@ -120,7 +120,7 @@ export class WorldView implements DomView, Configurable {
   }
 
   private onResizeTrailing() {
-    this.updateCamera();
+    this.camera.update();
     this.updateRenderer(this.renderer);
     this.playAnimation();
   }
@@ -159,50 +159,13 @@ export class WorldView implements DomView, Configurable {
     renderer.setSize(this.element.clientWidth, this.element.clientHeight);
   }
 
-  private createCamera(): OrthographicCamera {
-    const {left, right, top, bottom, near, far} = this.getCameraFrustum();
-    const camera = new OrthographicCamera(left, right, top, bottom, near, far);
-
-    camera.position.z = this.config.camera.distance;
-
-    return camera;
-  }
-
-  private updateCamera() {
-    const {left, right, top, bottom} = this.getCameraFrustum();
-
-    this.camera.left = left;
-    this.camera.right = right;
-    this.camera.top = top;
-    this.camera.bottom = bottom;
-
-    this.camera.updateProjectionMatrix();
-  }
-
-  // @see: https://threejs.org/examples/#canvas_camera_orthographic
-  private getCameraFrustum(): CameraFrustum {
-    const {size, near, far} = this.config.camera.frustum;
-    const screenAspectRatio = this.element.clientWidth / this.element.clientHeight;
-    const halfWidth = size * screenAspectRatio / 2;
-    const halfHeight = size / 2;
-
-    return {
-      left: -halfWidth,
-      right: halfWidth,
-      top: halfHeight,
-      bottom: -halfHeight,
-      near,
-      far,
-    };
-  }
-
   private getPositionFromDomCoords(coords: Vector2): Vector2 {
     // NDC (Normalized Device Coordinates: [-1, 1])
     const vector = new Vector2(
       (coords.x / this.element.clientWidth) * 2 - 1,
       -(coords.y / this.element.clientHeight) * 2 + 1,
     );
-    const {right, top} = this.getCameraFrustum();
+    const {right, top} = this.camera.getFrustum();
 
     return vector.multiply(new Vector2(right, top));
   }
