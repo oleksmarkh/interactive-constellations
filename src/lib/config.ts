@@ -6,7 +6,8 @@ const config: Config = {
     expose: true,
 
     helpers: {
-      axes: true,
+      center: true,
+      mouse: true,
     },
   },
 
@@ -23,7 +24,13 @@ const config: Config = {
     distance: 750,
   },
 
-  resizeDebouncePeriod: 400,
+  resizeFrequency: 400,
+
+  colors: {
+    helpers: {
+      mouse: 0xaa00aa,
+    },
+  },
 };
 
 export default config;

@@ -4,7 +4,8 @@ interface Config {
     expose: boolean;
 
     helpers: {
-      axes: boolean;
+      center: boolean;
+      mouse: boolean;
     };
   };
 
@@ -22,7 +23,13 @@ interface Config {
     distance: number,
   };
 
-  resizeDebouncePeriod: number;
+  resizeFrequency: number;
+
+  colors: {
+    helpers: {
+      mouse: number,
+    },
+  },
 }
 
 export interface Configurable {

@@ -1,24 +1,18 @@
-import {forEach, debounce, DebounceSettings} from 'lodash';
-import {WebGLRenderer, Scene, Vector2, AxesHelper} from 'three';
+import {forEach} from 'lodash';
+import {WebGLRenderer, Scene, Vector2} from 'three';
 
 import Config, {Configurable} from 'src/lib/types/Config';
 import {DomView} from 'src/lib/types/View';
 
+import {debounceLeading, debounceTrailing} from 'src/lib/utils/function';
+
 import Camera from 'src/lib/classes/Camera';
 import Stats from 'src/lib/classes/Stats';
-
-const debounceSettingsLeading: DebounceSettings = {
-  leading: true,
-  trailing: false,
-};
-
-const debounceSettingsTrailing: DebounceSettings = {
-  leading: false,
-  trailing: true,
-};
+import {CenterHelper, MouseHelper} from 'src/lib/classes/ViewHelpers';
 
 interface Helpers {
-  axes?: AxesHelper;
+  center?: CenterHelper;
+  mouse?: MouseHelper;
 }
 
 export class WorldView implements DomView, Configurable {
@@ -26,6 +20,7 @@ export class WorldView implements DomView, Configurable {
   private scene: Scene;
   private camera: Camera;
   private stats: Stats;
+  private mouse: Vector2;
   private helpers: Helpers;
 
   private isAnimating: boolean;
@@ -40,22 +35,18 @@ export class WorldView implements DomView, Configurable {
     this.renderer = this.createRenderer();
     this.scene = new Scene();
     this.camera = new Camera(this.element, this.config);
-    this.stats = this.createStats();
+    this.stats = this.config.debug.stats
+      ? new Stats(this.element)
+      : null;
+    this.mouse = new Vector2(10, 10);
     this.helpers = this.createHelpers();
 
     this.isAnimating = false;
 
     this.animate = this.animate.bind(this);
-    this.onResizeLeading = debounce(
-      this.onResizeLeading.bind(this),
-      this.config.resizeDebouncePeriod,
-      debounceSettingsLeading,
-    );
-    this.onResizeTrailing = debounce(
-      this.onResizeTrailing.bind(this),
-      this.config.resizeDebouncePeriod,
-      debounceSettingsTrailing,
-    );
+    this.onResizeLeading = debounceLeading(this.onResizeLeading.bind(this), this.config.resizeFrequency);
+    this.onResizeTrailing = debounceTrailing(this.onResizeTrailing.bind(this), this.config.resizeFrequency);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   public mount() {
@@ -93,7 +84,7 @@ export class WorldView implements DomView, Configurable {
     this.camera.reloadConfig();
 
     if (this.config.debug.stats && !this.stats) {
-      this.stats = this.createStats();
+      this.stats = new Stats(this.element);
       this.stats.mount();
     } else if (!this.config.debug.stats && this.stats) {
       this.stats.unmount();
@@ -108,11 +99,13 @@ export class WorldView implements DomView, Configurable {
   private subscribeToDomEvents() {
     window.addEventListener('resize', this.onResizeLeading);
     window.addEventListener('resize', this.onResizeTrailing);
+    this.element.addEventListener('mousemove', this.onMouseMove);
   }
 
   private unsubscribeFromDomEvents() {
     window.removeEventListener('resize', this.onResizeLeading);
     window.removeEventListener('resize', this.onResizeTrailing);
+    this.element.removeEventListener('mousemove', this.onMouseMove);
   }
 
   private onResizeLeading() {
@@ -123,6 +116,14 @@ export class WorldView implements DomView, Configurable {
     this.camera.update();
     this.updateRenderer(this.renderer);
     this.playAnimation();
+  }
+
+  private onMouseMove(event: MouseEvent) {
+    this.mouse.copy(this.getPositionFromDomCoords(new Vector2(event.offsetX, event.offsetY)));
+
+    if (this.helpers.mouse) {
+      this.helpers.mouse.update();
+    }
   }
 
   private animate() {
@@ -170,29 +171,27 @@ export class WorldView implements DomView, Configurable {
     return vector.multiply(new Vector2(right, top));
   }
 
-  private createStats(): Stats {
-    return this.config.debug.stats
-      ? new Stats(this.element)
-      : null;
-  }
-
   private createHelpers(): Helpers {
     const helpers: Helpers = {};
 
-    if (this.config.debug.helpers.axes) {
-      const {x, y} = this.getPositionFromDomCoords(new Vector2(this.renderer.getSize().width, 0));
-      helpers.axes = new AxesHelper(Math.max(x, y));
+    if (this.config.debug.helpers.center) {
+      const topRight = new Vector2(this.renderer.getSize().width, 0);
+      helpers.center = new CenterHelper(this.getPositionFromDomCoords(topRight));
+    }
+
+    if (this.config.debug.helpers.mouse) {
+      helpers.mouse = new MouseHelper(this.mouse, this.config);
     }
 
     return helpers;
   }
 
   private addHelpers() {
-    forEach(this.helpers, (helper) => this.scene.add(helper));
+    forEach(this.helpers, (helper) => this.scene.add(helper.object));
   }
 
   private removeHelpers() {
-    forEach(this.helpers, (helper) => this.scene.remove(helper));
+    forEach(this.helpers, (helper) => this.scene.remove(helper.object));
   }
 }
 
