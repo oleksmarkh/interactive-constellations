@@ -8,4 +8,9 @@ export interface DomView extends View {
   unmount: () => void;
 }
 
+export interface Dimensions {
+  width: number;
+  height: number;
+}
+
 export default View;

@@ -15,8 +15,8 @@ const center = new Vector3();
 export class CenterHelper implements Helper {
   public object: AxesHelper;
 
-  constructor({x, y}: Vector2) {
-    this.object = new AxesHelper(Math.max(x, y));
+  constructor(size: number) {
+    this.object = new AxesHelper(size);
     this.object.name = 'axes helper';
   }
 }

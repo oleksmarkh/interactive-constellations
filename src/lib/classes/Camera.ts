@@ -1,13 +1,14 @@
 import {OrthographicCamera} from 'three';
 
 import Config, {Configurable} from 'src/lib/types/Config';
+import {Dimensions} from 'src/lib/types/View';
 import {CameraFrustum} from 'src/lib/types/Camera';
 
 class Camera implements Configurable {
   public orthographicCamera: OrthographicCamera;
 
   constructor(
-    public element: HTMLElement,
+    public dimensions: Dimensions,
     public config: Config,
   ) {
     const {left, right, top, bottom, near, far} = this.getFrustum();
@@ -23,9 +24,11 @@ class Camera implements Configurable {
 
   // @see: https://threejs.org/examples/#canvas_camera_orthographic
   public getFrustum(): CameraFrustum {
+    const {width, height} = this.dimensions;
     const {size, near, far} = this.config.camera.frustum;
-    const screenAspectRatio = this.element.clientWidth / this.element.clientHeight;
-    const halfWidth = size * screenAspectRatio / 2;
+
+    const aspectRatio = width / height;
+    const halfWidth = size * aspectRatio / 2;
     const halfHeight = size / 2;
 
     return {

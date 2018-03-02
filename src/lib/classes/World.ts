@@ -2,7 +2,7 @@ import {forEach} from 'lodash';
 import {WebGLRenderer, Scene, Vector2} from 'three';
 
 import Config, {Configurable} from 'src/lib/types/Config';
-import {DomView} from 'src/lib/types/View';
+import {DomView, Dimensions} from 'src/lib/types/View';
 
 import {debounceLeading, debounceTrailing} from 'src/lib/utils/function';
 
@@ -16,11 +16,13 @@ interface Helpers {
 }
 
 export class WorldView implements DomView, Configurable {
+  private dimensions: Dimensions;
+  private mouse: Vector2;
+
   private renderer: WebGLRenderer;
   private scene: Scene;
   private camera: Camera;
   private stats: Stats;
-  private mouse: Vector2;
   private helpers: Helpers;
 
   private isAnimating: boolean;
@@ -32,13 +34,15 @@ export class WorldView implements DomView, Configurable {
   ) {
     console.log(this.world);
 
+    this.dimensions = this.getDimensions();
+    this.mouse = new Vector2(10, 10);
+
     this.renderer = this.createRenderer();
     this.scene = new Scene();
-    this.camera = new Camera(this.element, this.config);
+    this.camera = new Camera(this.dimensions, this.config);
     this.stats = this.config.debug.stats
       ? new Stats(this.element)
       : null;
-    this.mouse = new Vector2(10, 10);
     this.helpers = this.createHelpers();
 
     this.isAnimating = false;
@@ -113,6 +117,11 @@ export class WorldView implements DomView, Configurable {
   }
 
   private onResizeTrailing() {
+    // this should remain the only place where dimensions are updated
+    // (i.e. "element.clientWidth"/"element.clientHeight" are accessed)
+    // to avoid unnecessary layout thrashing
+    this.dimensions = this.getDimensions();
+
     this.camera.update();
     this.updateRenderer(this.renderer);
     this.playAnimation();
@@ -124,6 +133,13 @@ export class WorldView implements DomView, Configurable {
     if (this.helpers.mouse) {
       this.helpers.mouse.update();
     }
+  }
+
+  private getDimensions(): Dimensions {
+    return {
+      width: this.element.clientWidth,
+      height: this.element.clientHeight,
+    };
   }
 
   private animate() {
@@ -147,7 +163,6 @@ export class WorldView implements DomView, Configurable {
     const renderer = new WebGLRenderer({
       alpha: true,
       antialias: this.config.renderer.antialias,
-      devicePixelRatio: window.devicePixelRatio,
     });
 
     this.updateRenderer(renderer);
@@ -156,17 +171,21 @@ export class WorldView implements DomView, Configurable {
   }
 
   private updateRenderer(renderer: WebGLRenderer) {
+    const {width, height} = this.dimensions;
+
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(this.element.clientWidth, this.element.clientHeight);
+    renderer.setSize(width, height);
   }
 
-  private getPositionFromDomCoords(coords: Vector2): Vector2 {
+  private getPositionFromDomCoords({x, y}: Vector2): Vector2 {
+    const {width, height} = this.dimensions;
+    const {right, top} = this.camera.getFrustum();
+
     // NDC (Normalized Device Coordinates: [-1, 1])
     const vector = new Vector2(
-      (coords.x / this.element.clientWidth) * 2 - 1,
-      -(coords.y / this.element.clientHeight) * 2 + 1,
+      (x / width) * 2 - 1,
+      -(y / height) * 2 + 1,
     );
-    const {right, top} = this.camera.getFrustum();
 
     return vector.multiply(new Vector2(right, top));
   }
@@ -176,7 +195,9 @@ export class WorldView implements DomView, Configurable {
 
     if (this.config.debug.helpers.center) {
       const topRight = new Vector2(this.renderer.getSize().width, 0);
-      helpers.center = new CenterHelper(this.getPositionFromDomCoords(topRight));
+      const {x, y} = this.getPositionFromDomCoords(topRight);
+
+      helpers.center = new CenterHelper(Math.max(x, y));
     }
 
     if (this.config.debug.helpers.mouse) {
